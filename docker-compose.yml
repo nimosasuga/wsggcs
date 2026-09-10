@@ -1,0 +1,30 @@
+services:
+  gc-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: washeng-gc-studio:latest
+    container_name: washeng-gc-studio
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-u495297697_appsheet}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      APP_DOMAIN: gc.cargo.washeng.online
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+    networks:
+      - washeng
+
+networks:
+  washeng:
+    external: true
