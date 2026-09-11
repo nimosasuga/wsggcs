@@ -143,7 +143,7 @@ export const CreateDatabaseModal: React.FC<CreateDatabaseModalProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
               <span>Nama Database</span>
-              <span className="text-[10px] text-slate-400 font-normal font-mono">Contoh: washeng_express, app_backup</span>
+              <span className="text-[10px] text-slate-400 font-normal font-mono">Contoh: cargo_master, app_backup, db_ekspedisi</span>
             </label>
             <div className="relative">
               <input

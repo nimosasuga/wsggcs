@@ -71,21 +71,23 @@ export function analyzeSqlSafety(sql: string): QuerySafetyCheck {
 
 /**
  * Validasi scope isolasi database:
- * Hanya mengizinkan database milik Washeng dan memblokir database lain.
+ * Menyembunyikan database internal sistem MySQL (information_schema, performance_schema, mysql, sys)
+ * dan mengizinkan semua database pengguna yang sah secara bebas tanpa batasan awalan nama.
  */
 export function isDatabaseAllowed(dbName?: string): boolean {
   if (!dbName) return false;
   const lower = dbName.trim().toLowerCase();
 
-  // Database sistem MySQL selalu diblokir dari scope studio
+  // Database internal mesin MySQL selalu diblokir dari antarmuka studio
   const systemDbs = ['information_schema', 'performance_schema', 'mysql', 'sys'];
   if (systemDbs.includes(lower)) return false;
 
-  // Jika terdapat konfigurasi whitelist eksplisit di .env
+  // Jika terdapat konfigurasi whitelist eksplisit di .env (opsional)
   const allowedEnv = process.env.ALLOWED_DATABASES;
-  if (allowedEnv && allowedEnv.trim()) {
+  if (allowedEnv && allowedEnv.trim() && allowedEnv.trim() !== '*') {
     const patterns = allowedEnv.split(',').map(s => s.trim().toLowerCase());
     return patterns.some(pattern => {
+      if (pattern === '*') return true;
       if (pattern.endsWith('*')) {
         return lower.startsWith(pattern.slice(0, -1));
       }
@@ -93,9 +95,8 @@ export function isDatabaseAllowed(dbName?: string): boolean {
     });
   }
 
-  // Kebijakan Baku Ekosistem Washeng:
-  // Hanya izinkan database utama (u495297697_appsheet) atau database dengan awalan washeng_ / u495297697_
-  const primaryDb = (process.env.DB_DATABASE || 'u495297697_appsheet').toLowerCase();
-  return lower === primaryDb || lower.startsWith('washeng_') || lower.startsWith('u495297697_');
+  // Secara baku, izinkan semua database pengguna (bebas nama tanpa batasan awalan)
+  return true;
 }
+
 
