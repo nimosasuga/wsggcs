@@ -113,7 +113,7 @@ export const CreateDatabaseModal: React.FC<CreateDatabaseModalProps> = ({
               <div className="flex items-center gap-1.5">
                 <h3 className="font-bold text-slate-800 text-sm tracking-tight">Buat Database Baru</h3>
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200 font-mono font-bold">
-                  Admin Washeng
+                  Super Admin
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 mt-0.5">

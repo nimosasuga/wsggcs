@@ -30,7 +30,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
               size === 'lg' ? 'text-xl' : size === 'md' ? 'text-sm' : 'text-xs'
             }`}
           >
-            Washeng
+            Bintara
           </span>
           <span
             className={`font-semibold tracking-tight text-blue-600 ${

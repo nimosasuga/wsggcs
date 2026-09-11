@@ -37,16 +37,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="max-w-sm w-full bg-white border border-slate-200 rounded-xl shadow-md p-6 sm:p-7 space-y-5">
         {/* Brand Header with Corporate Logo */}
         <div className="flex flex-col items-center text-center space-y-3 pb-2 border-b border-slate-100">
-          <div className="w-full flex items-center justify-center py-2 px-3 rounded-xl bg-slate-50/70 border border-slate-100">
+          <div className="w-full flex items-center justify-center py-2.5 px-3 rounded-xl bg-slate-50/50 border border-slate-100/80">
             <img
-              src="/img/logo-login.jpg"
+              src="/img/logo-login.png"
               alt="Bintara Teknologi Nusa"
-              className="h-13 sm:h-15 w-auto max-w-full object-contain mix-blend-multiply"
+              className="h-12 sm:h-14 w-auto max-w-full object-contain drop-shadow-xs"
             />
           </div>
           <div className="space-y-0.5">
             <div className="flex items-center justify-center gap-1.5">
-              <span className="font-bold text-slate-800 text-sm tracking-tight">Washeng DB Studio</span>
+              <span className="font-bold text-slate-800 text-sm tracking-tight">Bintara DB Studio</span>
               <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
                 MySQL
               </span>
