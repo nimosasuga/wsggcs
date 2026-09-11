@@ -26,6 +26,7 @@ export const App: React.FC = () => {
   const [isLoadingTables, setIsLoadingTables] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState({ ok: true, latencyMs: 0 });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isCreateDbModalOpen, setIsCreateDbModalOpen] = useState(false);
@@ -123,6 +124,7 @@ export const App: React.FC = () => {
 
   const handleSelectTable = (tblName: string) => {
     setSelectedTable(tblName);
+    setIsMobileSidebarOpen(false);
     if (activeTab === 'export') {
       setIsExportModalOpen(true);
     } else if (activeTab === 'tables' || activeTab === 'data') {
@@ -133,6 +135,7 @@ export const App: React.FC = () => {
   };
 
   const handleTabChange = (tab: ActiveTab) => {
+    setIsMobileSidebarOpen(false);
     if (tab === 'export') {
       setIsExportModalOpen(true);
     } else {
@@ -180,6 +183,8 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onLogout={handleLogout}
         onOpenCreateDatabase={() => setIsCreateDbModalOpen(true)}
+        onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+        tablesCount={tables.length}
       />
 
       {/* Workspace Body */}
@@ -189,11 +194,16 @@ export const App: React.FC = () => {
           tables={tables}
           selectedTable={selectedTable}
           onSelectTable={handleSelectTable}
-          onOpenOverview={() => setActiveTab('tables')}
+          onOpenOverview={() => {
+            setActiveTab('tables');
+            setIsMobileSidebarOpen(false);
+          }}
           isLoading={isLoadingTables}
           onRefresh={() => loadTables()}
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
         {/* Center Main Viewport */}

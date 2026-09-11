@@ -285,8 +285,8 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({ tables, currentDatabase })
               Query berhasil dieksekusi, tidak ada baris data dikembalikan (0 rows).
             </div>
           ) : (
-            <div className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
-              <table className="w-full text-left text-xs text-slate-700 font-mono">
+            <div className="border border-slate-200 rounded-lg overflow-x-auto bg-white shadow-sm">
+              <table className="min-w-max w-full text-left text-xs text-slate-700 font-mono">
                 <thead className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase text-slate-600 font-semibold sticky top-0 z-10">
                   <tr>
                     <th className="px-3 py-2 w-12 text-center text-slate-400 border-r border-slate-200">#</th>

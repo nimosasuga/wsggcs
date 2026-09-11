@@ -39,7 +39,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           >
             DB Studio
           </span>
-          <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
+          <span className="hidden sm:inline-block text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
             MySQL
           </span>
         </div>

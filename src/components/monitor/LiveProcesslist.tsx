@@ -151,7 +151,7 @@ export const LiveProcesslist: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left text-xs text-slate-700 font-mono">
+          <table className="min-w-[800px] w-full text-left text-xs text-slate-700 font-mono">
             <thead className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase text-slate-600 font-semibold">
               <tr>
                 <th className="px-3 py-2 text-center w-14">ID</th>

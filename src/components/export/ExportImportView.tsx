@@ -363,7 +363,7 @@ export const ExportImportView: React.FC<ExportImportViewProps> = ({
       </div>
 
       {/* Main Form Content */}
-      <div className="p-6 max-w-4xl w-full mx-auto space-y-6">
+      <div className="p-3 sm:p-6 max-w-4xl w-full mx-auto space-y-4 sm:space-y-6">
         {/* ============================================================ */}
         {/* TAB 1: EKSPOR                                                */}
         {/* ============================================================ */}
@@ -843,7 +843,7 @@ export const ExportImportView: React.FC<ExportImportViewProps> = ({
                       Pratinjau Data (Kolom terdeteksi: {previewColumns.length}):
                     </div>
                     <div className="overflow-x-auto border border-slate-200 rounded-lg max-h-48">
-                      <table className="w-full text-left text-xs font-mono">
+                      <table className="min-w-max w-full text-left text-xs font-mono">
                         <thead className="bg-slate-100 border-b border-slate-200 text-slate-600">
                           <tr>
                             {previewColumns.map((c, i) => (

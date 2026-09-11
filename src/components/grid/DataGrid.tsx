@@ -187,9 +187,9 @@ export const DataGrid: React.FC<DataGridProps> = ({ tableName, database, onOpenE
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 overflow-hidden bg-white">
       {/* Top Toolbar */}
-      <div className="bg-white border-b border-slate-200 px-3.5 py-2 flex items-center justify-between gap-3 shrink-0 select-none shadow-2xs">
+      <div className="bg-white border-b border-slate-200 px-3 sm:px-3.5 py-2 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-3 shrink-0 select-none shadow-2xs">
         {/* Left: Table Breadcrumb & Meta */}
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <div className="flex items-center gap-1.5 font-mono text-xs">
             <span className="text-slate-400 font-sans text-xs">Table:</span>
             <span className="font-bold text-slate-900 text-sm truncate font-mono">{tableName}</span>
@@ -199,13 +199,13 @@ export const DataGrid: React.FC<DataGridProps> = ({ tableName, database, onOpenE
           </span>
           {primaryKeys.length > 0 && (
             <span className="hidden sm:inline text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold shrink-0">
-              Primary Key: {primaryKeys.join(', ')}
+              PK: {primaryKeys.join(', ')}
             </span>
           )}
         </div>
 
         {/* Right: Search, Refresh, Export, Insert */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap sm:flex-nowrap">
           {/* Search Box */}
           <div className="relative">
             <Search size={12} className="absolute left-2.5 top-2 text-slate-400 pointer-events-none" />
@@ -215,7 +215,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ tableName, database, onOpenE
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && loadData()}
               placeholder="Search / Filter..."
-              className="bg-slate-50 hover:bg-white focus:bg-white text-slate-800 text-xs rounded-md border border-slate-200 focus:border-blue-500 pl-7 pr-3 py-1 w-36 sm:w-48 font-mono transition shadow-2xs"
+              className="bg-slate-50 hover:bg-white focus:bg-white text-slate-800 text-xs rounded-md border border-slate-200 focus:border-blue-500 pl-7 pr-3 py-1 w-32 xs:w-36 sm:w-48 font-mono transition shadow-2xs"
             />
           </div>
 
@@ -261,10 +261,10 @@ export const DataGrid: React.FC<DataGridProps> = ({ tableName, database, onOpenE
           {/* Insert Row Button */}
           <button
             onClick={() => setIsInsertOpen(true)}
-            className="flex items-center gap-1 px-3 py-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-2xs transition cursor-pointer"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-2xs transition cursor-pointer"
           >
             <Plus size={13} />
-            <span>Insert Row</span>
+            <span className="hidden xs:inline">Insert Row</span>
           </button>
         </div>
       </div>
@@ -324,7 +324,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ tableName, database, onOpenE
           <>
             {/* 1. Desktop & Tablet Table View */}
             <div className={`${viewMode === 'cards' ? 'hidden' : 'block'} min-w-full inline-block align-middle`}>
-              <table className="min-w-full border-separate border-spacing-0 text-left text-xs text-slate-700 font-mono">
+              <table className="min-w-max w-full border-separate border-spacing-0 text-left text-xs text-slate-700 font-mono">
                 <thead className="bg-slate-50 sticky top-0 z-10 select-none shadow-2xs">
                   <tr>
                     <th className="px-2.5 py-2 w-10 text-center border-b border-r border-slate-200 bg-slate-50">
@@ -489,19 +489,22 @@ export const DataGrid: React.FC<DataGridProps> = ({ tableName, database, onOpenE
       </div>
 
       {/* Bottom Pagination Controls */}
-      <div className="bg-slate-50 border-t border-slate-200 px-4 py-2 flex items-center justify-between gap-2 text-xs font-mono shrink-0 select-none">
-        <div className="flex items-center gap-3">
+      <div className="bg-slate-50 border-t border-slate-200 px-3 sm:px-4 py-2 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs font-mono shrink-0 select-none">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <span className="text-slate-600 text-xs font-sans">
-            Showing <span className="font-semibold text-slate-800 font-mono">{totalRows === 0 ? 0 : (page - 1) * limit + 1}</span> to{' '}
-            <span className="font-semibold text-slate-800 font-mono">{Math.min(page * limit, totalRows)}</span> of{' '}
-            <span className="font-bold text-slate-900 font-mono">{totalRows.toLocaleString()}</span> entries
+            <span className="hidden xs:inline">Showing </span>
+            <span className="font-semibold text-slate-800 font-mono">{totalRows === 0 ? 0 : (page - 1) * limit + 1}</span>-
+            <span className="font-semibold text-slate-800 font-mono">{Math.min(page * limit, totalRows)}</span>
+            <span className="text-slate-400 font-sans"> / </span>
+            <span className="font-bold text-slate-900 font-mono">{totalRows.toLocaleString()}</span>
+            <span className="hidden xs:inline"> entries</span>
           </span>
           <div className="flex items-center gap-1">
-            <span className="text-slate-400 text-[11px] font-sans">| Per page:</span>
+            <span className="text-slate-400 text-[11px] font-sans">| Per hal:</span>
             <select
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value))}
-              className="bg-white text-slate-800 text-xs rounded border border-slate-200 px-2 py-0.5 focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs font-mono"
+              className="bg-white text-slate-800 text-xs rounded border border-slate-200 px-1.5 py-0.5 focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs font-mono"
             >
               <option value="25">25</option>
               <option value="50">50</option>
@@ -522,7 +525,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ tableName, database, onOpenE
             <span className="hidden sm:inline">Prev</span>
           </button>
 
-          <span className="px-2.5 py-0.5 rounded bg-white border border-slate-200 text-slate-800 text-xs font-mono font-semibold">
+          <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-800 text-xs font-mono font-semibold">
             {page} / {totalPages}
           </span>
 
