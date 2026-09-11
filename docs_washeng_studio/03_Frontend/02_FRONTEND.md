@@ -58,6 +58,30 @@ Sesuai preferensi manajemen basis data densitas tinggi:
 
 ---
 
+## 🔒 Status Rilis Stabil (Locked Baseline: v1.0.0-stable)
+
+Versi saat ini telah **DINYATAKAN STABIL** dan dikunci sebagai acuan standar:
+- **Fitur, tata letak, dan styling antarmuka dipertahankan 100%**.
+- Tag Git: `v1.0.0-stable` (Commit `d371f4d`).
+
+### Standar Tata Letak Responsif (Desktop, Tablet, & Mobile):
+1. **Desktop / Laptop (`>= 1024px`)**:
+   - Sidebar kiri tetap (`w-60 sm:w-64`) dengan fitur *collapsible* (`w-11`).
+   - Matriks tabel 9 kolom dengan *sticky header* dan *sticky footer total summary*.
+   - Navigasi tab lengkap dan bilah telemetri latensi MySQL realtime.
+2. **Tablet (`768px - 1023px`)**:
+   - Sidebar mendukung mode ciutkan (*compact icon bar*).
+   - Tabel matriks dan data grid dapat digulir horizontal mulus dengan `min-w-[820px]`.
+3. **Mobile Phone (`< 768px`)**:
+   - **Off-Canvas Sliding Drawer**: Sidebar disembunyikan dari aliran dokumen (`hidden md:flex`) dan digantikan oleh *sliding drawer* geser kiri (`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw]`) dengan *backdrop overlay* gelap (`fixed inset-0 bg-slate-900/50`).
+   - Area `<main>` mendapatkan **100% lebar penuh layar**.
+   - Tombol **`Tabel [X]`** tersedia di navbar atas untuk membuka drawer dengan 1 ketukan.
+   - Pilihan tabel otomatis menutup drawer (*auto-dismiss*).
+   - Selector database diberi pembatas lebar (`max-w-[105px] xs:max-w-[130px] truncate`).
+   - Paginasi data grid adaptif dan ringkas (`1-50 / Total Baris`).
+
+---
+
 ## 🔗 Tautan Navigasi
 
 - Lanjut ke [[03_EXPORT_IMPORT_ID]] untuk detail fitur ekspor impor.

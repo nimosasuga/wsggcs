@@ -16,14 +16,17 @@ Dokumen ini adalah pedoman wajib bagi AI Agent maupun Developer berikutnya yang 
 
 ## 📜 Aturan Utama & SOP Pengerjaan
 
-1. **Bahasa Komunikasi**: Selalu gunakan Bahasa Indonesia yang profesional, ramah, dan solutif.
-2. **Kewajiban Membuat Plan**:
+1. **Status Versi Stabil (Locked Baseline v1.0.0-stable)**:
+   - **User telah menyatakan versi saat ini STABIL**.
+   - **Pertahankan 100% fitur, tata letak (desktop, tablet, mobile off-canvas drawer), serta styling density tinggi phpMyAdmin yang ada saat ini**. Dilarang mengubah tata letak, menghapus fitur, atau merusak gaya visual yang sudah baku tanpa instruksi eksplisit.
+2. **Bahasa Komunikasi**: Selalu gunakan Bahasa Indonesia yang profesional, ramah, dan solutif.
+3. **Kewajiban Membuat Plan**:
    - Selalu buat dokumen rencana kerja (*Implementation Plan*) sebelum melakukan modifikasi struktural, penambahan modul besar, atau tindakan berisiko.
    - **Tunggu persetujuan (ACC)** eksplisit dari pengguna sebelum mengeksekusi perubahan.
-3. **Proteksi Database**:
+4. **Proteksi Database**:
    - **DILARANG KERAS** menjalankan `DROP DATABASE`, `DROP TABLE`, atau `TRUNCATE` pada database produksi tanpa konfirmasi eksplisit dari pengguna.
    - Gunakan fitur `Dry Run` atau `ALLOW_DESTRUCTIVE_QUERIES=false` pada backend untuk mencegah eksekusi query berbahaya tanpa sengaja.
-4. **Kerahasiaan Kredensial**:
+5. **Kerahasiaan Kredensial**:
    - Berkas `.env` tidak boleh di-commit atau dibagikan ke Git publik. Pastikan `.gitignore` selalu aktif mengabaikan file lingkungan dan folder `.obsidian/`.
 
 ---
