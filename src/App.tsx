@@ -241,6 +241,11 @@ export const App: React.FC = () => {
             <TableStructure
               tableName={selectedTable}
               currentDatabase={currentDatabase}
+              onRenameSuccess={(newTbl) => {
+                setSelectedTable(newTbl);
+                loadTables(currentDatabase);
+              }}
+              onRefreshTables={() => loadTables(currentDatabase)}
             />
           )}
 

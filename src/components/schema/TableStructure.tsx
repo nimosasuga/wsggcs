@@ -1,18 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Wrench, Database, CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { 
+  Key, Wrench, Database, CheckCircle2, ShieldCheck, 
+  AlertCircle, Plus, Edit2, Trash2, Tag, AlertTriangle 
+} from 'lucide-react';
 import { ColumnInfo, IndexInfo } from '../../types/database';
 import { api } from '../../services/api';
+import { ColumnFormModal } from './ColumnFormModal';
+import { RenameTableModal } from './RenameTableModal';
 
 interface TableStructureProps {
   tableName: string | null;
   currentDatabase: string;
+  onRenameSuccess?: (newTableName: string) => void;
+  onRefreshTables?: () => void;
 }
 
-export const TableStructure: React.FC<TableStructureProps> = ({ tableName, currentDatabase }) => {
+export const TableStructure: React.FC<TableStructureProps> = ({ 
+  tableName, 
+  currentDatabase,
+  onRenameSuccess,
+  onRefreshTables,
+}) => {
   const [columns, setColumns] = useState<ColumnInfo[]>([]);
   const [indexes, setIndexes] = useState<IndexInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [optimizeMessage, setOptimizeMessage] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Modals
+  const [isAddColumnOpen, setIsAddColumnOpen] = useState(false);
+  const [editingColumn, setEditingColumn] = useState<ColumnInfo | null>(null);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
 
   const loadStructure = async () => {
     if (!tableName) return;
@@ -48,6 +66,24 @@ export const TableStructure: React.FC<TableStructureProps> = ({ tableName, curre
     }
   };
 
+  const handleDropColumn = async (colName: string) => {
+    if (!confirm(`PERINGATAN: Hapus kolom "${colName}" dari tabel "${tableName}"? Seluruh data pada kolom ini akan hilang secara permanen!`)) {
+      return;
+    }
+    try {
+      const res = await api.dropColumn(tableName!, colName, currentDatabase);
+      if (res.ok) {
+        setActionMessage({ type: 'success', text: `Kolom "${colName}" berhasil dihapus dari tabel.` });
+        loadStructure();
+        onRefreshTables?.();
+      } else {
+        setActionMessage({ type: 'error', text: res.error || 'Gagal menghapus kolom.' });
+      }
+    } catch (err: any) {
+      setActionMessage({ type: 'error', text: err.message || 'Error server.' });
+    }
+  };
+
   if (!tableName) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-slate-400 font-sans text-xs h-full bg-slate-50">
@@ -59,7 +95,7 @@ export const TableStructure: React.FC<TableStructureProps> = ({ tableName, curre
 
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 overflow-y-auto bg-slate-50 p-2.5 sm:p-3 space-y-2.5">
-      {/* Table Header & Maintenance Button */}
+      {/* Table Header & Action Buttons */}
       <div className="bg-white border border-slate-200 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs shrink-0">
         <div>
           <div className="flex items-center gap-2">
@@ -76,19 +112,57 @@ export const TableStructure: React.FC<TableStructureProps> = ({ tableName, curre
           </p>
         </div>
 
-        <button
-          onClick={handleOptimize}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition shadow-2xs cursor-pointer"
-        >
-          <Wrench size={13} className="text-amber-700" />
-          <span>Optimalkan<span className="hidden sm:inline"> Tabel (OPTIMIZE TABLE)</span></span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <button
+            onClick={() => setIsRenameOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition shadow-2xs cursor-pointer"
+            title="Ganti Nama Tabel Ini (RENAME TABLE)"
+          >
+            <Tag size={12} className="text-blue-600" />
+            <span>Ganti Nama<span className="hidden sm:inline"> Tabel</span></span>
+          </button>
+
+          <button
+            onClick={handleOptimize}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition shadow-2xs cursor-pointer"
+          >
+            <Wrench size={13} className="text-amber-700" />
+            <span>Optimalkan<span className="hidden sm:inline"> Tabel (OPTIMIZE TABLE)</span></span>
+          </button>
+        </div>
       </div>
 
       {optimizeMessage && (
-        <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sans flex items-center gap-2 shrink-0">
-          <CheckCircle2 size={14} className="shrink-0 text-emerald-600" />
-          <span>{optimizeMessage}</span>
+        <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-sans flex items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={14} className="shrink-0 text-emerald-600" />
+            <span>{optimizeMessage}</span>
+          </div>
+          <button onClick={() => setOptimizeMessage(null)} className="opacity-70 hover:opacity-100 cursor-pointer p-1">
+            &times;
+          </button>
+        </div>
+      )}
+
+      {actionMessage && (
+        <div
+          className={`p-2.5 rounded-lg border text-xs font-sans flex items-center justify-between gap-2 shadow-2xs shrink-0 ${
+            actionMessage.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-rose-50 border-rose-200 text-rose-800'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {actionMessage.type === 'success' ? (
+              <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+            ) : (
+              <AlertTriangle size={14} className="text-rose-600 shrink-0" />
+            )}
+            <span>{actionMessage.text}</span>
+          </div>
+          <button onClick={() => setActionMessage(null)} className="opacity-70 hover:opacity-100 cursor-pointer p-1">
+            &times;
+          </button>
         </div>
       )}
 
@@ -96,21 +170,30 @@ export const TableStructure: React.FC<TableStructureProps> = ({ tableName, curre
       <div className="p-2.5 rounded-lg bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-start gap-2 shrink-0">
         <ShieldCheck size={15} className="text-blue-600 shrink-0 mt-0.5" />
         <div className="text-[11px] leading-relaxed">
-          <span className="font-semibold text-blue-950">Standar Kompatibilitas MySQL:</span> Kolom tanggal disarankan bertipe native SQL (<code className="font-mono font-bold">DATE</code>, <code className="font-mono font-bold">DATETIME</code>, <code className="font-mono font-bold">TIMESTAMP</code>) agar kompatibel dengan sistem dan integrasi webhook.
+          <span className="font-semibold text-blue-950">Standar Kompatibilitas MySQL:</span> Kolom tanggal disarankan bertipe native SQL (<code className="font-mono font-bold">DATE</code>, <code className="font-mono font-bold">DATETIME</code>, <code className="font-mono font-bold">TIMESTAMP</code>). Jika tabel ini terhubung ke AppSheet, lakukan <em>Regenerate Structure</em> di AppSheet setelah mengubah kolom.
         </div>
       </div>
 
-      {/* Columns List Section (phpMyAdmin Style) */}
+      {/* Columns List Section (phpMyAdmin Style with Column Actions) */}
       <div className="bg-white border border-slate-200 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0">
         <div className="px-3 py-2 bg-slate-100/80 border-b border-slate-200 flex items-center justify-between">
           <span className="text-xs font-bold text-slate-800 font-sans">Struktur Kolom ({columns.length})</span>
+          <button
+            onClick={() => setIsAddColumnOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer"
+          >
+            <Plus size={13} />
+            <span>Tambah Kolom</span>
+          </button>
         </div>
+
         <div className="overflow-auto flex-1 min-h-0">
-          <table className="min-w-[760px] w-full text-left text-xs text-slate-700 font-mono">
+          <table className="min-w-[820px] w-full text-left text-xs text-slate-700 font-mono">
             <thead className="bg-slate-100 sticky top-0 z-10 border-b border-slate-300 text-[11px] uppercase text-slate-600 font-semibold select-none shadow-2xs">
               <tr>
                 <th className="px-3 py-2 font-sans w-10 text-center">#</th>
                 <th className="px-3 py-2 font-sans">Nama Kolom (Field)</th>
+                <th className="px-3 py-2 font-sans text-center">Tindakan</th>
                 <th className="px-3 py-2 font-sans">Jenis (Type)</th>
                 <th className="px-3 py-2 font-sans">Penyortiran (Collation)</th>
                 <th className="px-3 py-2 font-sans text-center">Null</th>
@@ -128,10 +211,36 @@ export const TableStructure: React.FC<TableStructureProps> = ({ tableName, curre
                 return (
                   <tr key={col.name} className={`hover:bg-blue-50/50 transition ${idx % 2 === 1 ? 'bg-slate-50/40' : ''}`}>
                     <td className="px-3 py-1.5 text-center text-slate-400 text-[11px]">{idx + 1}</td>
-                    <td className="px-3 py-1.5 font-bold text-slate-900 flex items-center gap-1.5">
-                      {isPri && <span title="Primary Key"><Key size={12} className="text-amber-500 shrink-0" /></span>}
-                      <span>{col.name}</span>
+                    <td className="px-3 py-1.5 font-bold text-slate-900">
+                      <div className="flex items-center gap-1.5">
+                        {isPri && <span title="Primary Key"><Key size={12} className="text-amber-500 shrink-0" /></span>}
+                        <span>{col.name}</span>
+                      </div>
                     </td>
+
+                    {/* Actions Column (Ubah / Hapus) */}
+                    <td className="px-3 py-1.5 text-center whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5 text-[11px] font-sans">
+                        <button
+                          onClick={() => setEditingColumn(col)}
+                          className="inline-flex items-center gap-1 text-blue-700 hover:text-blue-900 hover:underline cursor-pointer"
+                          title={`Ubah definisi kolom ${col.name}`}
+                        >
+                          <Edit2 size={11} className="text-blue-600 shrink-0" />
+                          <span>Ubah</span>
+                        </button>
+                        <span className="text-slate-300 select-none">|</span>
+                        <button
+                          onClick={() => handleDropColumn(col.name)}
+                          className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 hover:underline cursor-pointer"
+                          title={`Hapus kolom ${col.name} (DROP)`}
+                        >
+                          <Trash2 size={11} className="text-red-500 shrink-0" />
+                          <span>Hapus</span>
+                        </button>
+                      </div>
+                    </td>
+
                     <td className="px-3 py-1.5">
                       <span className="px-1.5 py-0.2 rounded text-[11px] bg-slate-100 text-blue-700 border border-slate-200 font-medium font-mono">
                         {col.type}
@@ -211,6 +320,50 @@ export const TableStructure: React.FC<TableStructureProps> = ({ tableName, curre
           ))}
         </div>
       </div>
+
+      {/* Modal: Add Column */}
+      <ColumnFormModal
+        isOpen={isAddColumnOpen}
+        onClose={() => setIsAddColumnOpen(false)}
+        onSuccess={() => {
+          setActionMessage({ type: 'success', text: 'Kolom baru berhasil ditambahkan.' });
+          loadStructure();
+          onRefreshTables?.();
+        }}
+        tableName={tableName}
+        database={currentDatabase}
+        mode="add"
+        existingColumns={columns}
+      />
+
+      {/* Modal: Edit Column */}
+      <ColumnFormModal
+        isOpen={editingColumn !== null}
+        onClose={() => setEditingColumn(null)}
+        onSuccess={() => {
+          setActionMessage({ type: 'success', text: `Definisi kolom "${editingColumn?.name}" berhasil diperbarui.` });
+          loadStructure();
+          onRefreshTables?.();
+        }}
+        tableName={tableName}
+        database={currentDatabase}
+        mode="edit"
+        initialColumn={editingColumn}
+        existingColumns={columns}
+      />
+
+      {/* Modal: Rename Table */}
+      <RenameTableModal
+        isOpen={isRenameOpen}
+        onClose={() => setIsRenameOpen(false)}
+        onSuccess={(newTbl) => {
+          setActionMessage({ type: 'success', text: `Tabel "${tableName}" berhasil diubah namanya menjadi "${newTbl}".` });
+          onRenameSuccess?.(newTbl);
+          onRefreshTables?.();
+        }}
+        tableName={tableName}
+        database={currentDatabase}
+      />
     </div>
   );
 };

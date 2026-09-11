@@ -225,6 +225,46 @@ export const api = {
     return res.json();
   },
 
+  // Rename Table
+  async renameTable(table: string, newTableName: string, database?: string): Promise<{ ok: boolean; message?: string; newTableName?: string; error?: string }> {
+    const res = await fetch(`${BASE_URL}/crud/tables/${encodeURIComponent(table)}/rename`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ database, newTableName }),
+    });
+    return res.json();
+  },
+
+  // Add Column
+  async addColumn(table: string, column: any, position: 'FIRST' | 'AFTER' | 'END' = 'END', afterColumn?: string, database?: string): Promise<{ ok: boolean; message?: string; error?: string }> {
+    const res = await fetch(`${BASE_URL}/crud/tables/${encodeURIComponent(table)}/columns/add`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ database, column, position, afterColumn }),
+    });
+    return res.json();
+  },
+
+  // Modify Column
+  async modifyColumn(table: string, column: string, newColumn: any, database?: string): Promise<{ ok: boolean; message?: string; error?: string }> {
+    const res = await fetch(`${BASE_URL}/crud/tables/${encodeURIComponent(table)}/columns/${encodeURIComponent(column)}/modify`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ database, newColumn }),
+    });
+    return res.json();
+  },
+
+  // Drop Column
+  async dropColumn(table: string, column: string, database?: string): Promise<{ ok: boolean; message?: string; error?: string }> {
+    const res = await fetch(`${BASE_URL}/crud/tables/${encodeURIComponent(table)}/columns/${encodeURIComponent(column)}/drop`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ database, confirmed: true }),
+    });
+    return res.json();
+  },
+
   // Import CSV / JSON Rows
   async importData(table: string, columns: string[], rows: (string | number | null)[][], mode: 'INSERT' | 'REPLACE' | 'IGNORE' = 'INSERT', database?: string) {
     const res = await fetch(`${BASE_URL}/import/${encodeURIComponent(table)}`, {

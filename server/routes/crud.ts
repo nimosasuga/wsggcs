@@ -292,4 +292,180 @@ export async function crudRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ ok: false, error: err.message });
     }
   });
+
+  // 8. RENAME TABLE
+  fastify.post('/api/crud/tables/:table/rename', async (req: FastifyRequest<{ Params: { table: string }; Body: { database?: string; newTableName: string } }>, reply: FastifyReply) => {
+    const { table } = req.params;
+    const { database, newTableName } = req.body || {};
+
+    if (!newTableName || typeof newTableName !== 'string') {
+      return reply.status(400).send({ ok: false, error: 'Nama tabel baru wajib diisi.' });
+    }
+
+    const targetName = newTableName.trim();
+    if (!/^[a-zA-Z0-9_]+$/.test(targetName)) {
+      return reply.status(400).send({ ok: false, error: 'Nama tabel baru hanya boleh memuat huruf, angka, dan garis bawah (_).' });
+    }
+
+    const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
+    const pool = getPool(dbName);
+
+    try {
+      await pool.query(`RENAME TABLE \`${dbName}\`.\`${table}\` TO \`${dbName}\`.\`${targetName}\``);
+      return reply.send({
+        ok: true,
+        message: `Tabel \`${table}\` berhasil diubah namanya menjadi \`${targetName}\`.`,
+        newTableName: targetName,
+      });
+    } catch (err: any) {
+      return reply.status(400).send({ ok: false, error: err.message || 'Gagal mengubah nama tabel.' });
+    }
+  });
+
+  // 9. ADD COLUMN TO TABLE
+  fastify.post('/api/crud/tables/:table/columns/add', async (req: FastifyRequest<{ Params: { table: string }; Body: { database?: string; column: any; position?: 'FIRST' | 'AFTER' | 'END'; afterColumn?: string } }>, reply: FastifyReply) => {
+    const { table } = req.params;
+    const { database, column, position = 'END', afterColumn } = req.body || {};
+
+    if (!column || !column.name || !column.type) {
+      return reply.status(400).send({ ok: false, error: 'Nama dan tipe kolom wajib diisi.' });
+    }
+
+    const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
+    const pool = getPool(dbName);
+
+    try {
+      let colDef = `\`${column.name}\` ${column.type}`;
+      if (column.length) {
+        colDef += `(${column.length})`;
+      }
+      if (!column.nullable) {
+        colDef += ' NOT NULL';
+      } else {
+        colDef += ' NULL';
+      }
+      if (column.autoIncrement) {
+        colDef += ' AUTO_INCREMENT';
+      }
+      if (column.defaultValue !== undefined && column.defaultValue !== null && column.defaultValue !== '') {
+        const dVal = String(column.defaultValue).trim();
+        if (dVal.toUpperCase() === 'CURRENT_TIMESTAMP' || dVal.toUpperCase() === 'NULL') {
+          colDef += ` DEFAULT ${dVal.toUpperCase()}`;
+        } else {
+          colDef += ` DEFAULT '${dVal.replace(/'/g, "\\'")}'`;
+        }
+      } else if (column.nullable && column.defaultValue === null) {
+        colDef += ' DEFAULT NULL';
+      }
+      if (column.comment) {
+        colDef += ` COMMENT '${String(column.comment).replace(/'/g, "\\'")}'`;
+      }
+
+      let positionClause = '';
+      if (position === 'FIRST') {
+        positionClause = ' FIRST';
+      } else if (position === 'AFTER' && afterColumn) {
+        positionClause = ` AFTER \`${afterColumn}\``;
+      }
+
+      const sql = `ALTER TABLE \`${dbName}\`.\`${table}\` ADD COLUMN ${colDef}${positionClause}`;
+      await pool.query(sql);
+
+      return reply.send({
+        ok: true,
+        message: `Kolom \`${column.name}\` berhasil ditambahkan ke tabel \`${table}\`.`,
+      });
+    } catch (err: any) {
+      return reply.status(400).send({ ok: false, error: err.message || 'Gagal menambahkan kolom baru.' });
+    }
+  });
+
+  // 10. MODIFY/CHANGE COLUMN IN TABLE
+  fastify.put('/api/crud/tables/:table/columns/:column/modify', async (req: FastifyRequest<{ Params: { table: string; column: string }; Body: { database?: string; newColumn: any } }>, reply: FastifyReply) => {
+    const { table, column } = req.params;
+    const { database, newColumn } = req.body || {};
+
+    if (!newColumn || !newColumn.name || !newColumn.type) {
+      return reply.status(400).send({ ok: false, error: 'Definisi kolom baru (nama & tipe) wajib diisi.' });
+    }
+
+    const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
+    const pool = getPool(dbName);
+
+    try {
+      let colDef = `\`${newColumn.name}\` ${newColumn.type}`;
+      if (newColumn.length) {
+        colDef += `(${newColumn.length})`;
+      }
+      if (!newColumn.nullable) {
+        colDef += ' NOT NULL';
+      } else {
+        colDef += ' NULL';
+      }
+      if (newColumn.autoIncrement) {
+        colDef += ' AUTO_INCREMENT';
+      }
+      if (newColumn.defaultValue !== undefined && newColumn.defaultValue !== null && newColumn.defaultValue !== '') {
+        const dVal = String(newColumn.defaultValue).trim();
+        if (dVal.toUpperCase() === 'CURRENT_TIMESTAMP' || dVal.toUpperCase() === 'NULL') {
+          colDef += ` DEFAULT ${dVal.toUpperCase()}`;
+        } else {
+          colDef += ` DEFAULT '${dVal.replace(/'/g, "\\'")}'`;
+        }
+      } else if (newColumn.nullable && newColumn.defaultValue === null) {
+        colDef += ' DEFAULT NULL';
+      }
+      if (newColumn.comment) {
+        colDef += ` COMMENT '${String(newColumn.comment).replace(/'/g, "\\'")}'`;
+      }
+
+      // MySQL CHANGE COLUMN allows renaming as well as modifying types
+      const sql = `ALTER TABLE \`${dbName}\`.\`${table}\` CHANGE COLUMN \`${column}\` ${colDef}`;
+      await pool.query(sql);
+
+      return reply.send({
+        ok: true,
+        message: `Kolom \`${column}\` berhasil diperbarui.`,
+      });
+    } catch (err: any) {
+      return reply.status(400).send({ ok: false, error: err.message || 'Gagal mengubah kolom.' });
+    }
+  });
+
+  // 11. DROP COLUMN FROM TABLE
+  fastify.delete('/api/crud/tables/:table/columns/:column/drop', async (req: FastifyRequest<{ Params: { table: string; column: string }; Body: { database?: string; confirmed: boolean } }>, reply: FastifyReply) => {
+    const { table, column } = req.params;
+    const { database, confirmed } = req.body || {};
+
+    if (!confirmed) {
+      return reply.status(400).send({ ok: false, error: 'Konfirmasi diperlukan untuk menghapus kolom.' });
+    }
+
+    const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
+    const pool = getPool(dbName);
+
+    try {
+      const sql = `ALTER TABLE \`${dbName}\`.\`${table}\` DROP COLUMN \`${column}\``;
+      await pool.query(sql);
+
+      return reply.send({
+        ok: true,
+        message: `Kolom \`${column}\` berhasil dihapus dari tabel \`${table}\`.`,
+      });
+    } catch (err: any) {
+      return reply.status(400).send({ ok: false, error: err.message || 'Gagal menghapus kolom.' });
+    }
+  });
 }
