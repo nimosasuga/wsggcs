@@ -54,6 +54,16 @@ app.addHook('onRequest', async (req, reply) => {
   }
 });
 
+// Enforce anti-indexing headers globally for Google & all search engines
+app.addHook('onSend', async (_req, reply) => {
+  reply.header('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, notranslate, noimageindex');
+});
+
+// Explicit robots.txt endpoint to block search engine crawlers
+app.get('/robots.txt', async (_req, reply) => {
+  reply.type('text/plain').send('User-agent: *\nDisallow: /\n');
+});
+
 // Health check and connection ping
 app.get('/api/health', async () => {
   const conn = await testConnection();

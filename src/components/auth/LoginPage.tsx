@@ -9,7 +9,7 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  const [username, setUsername] = useState('washeng');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +53,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         )}
 
         {/* Auth Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs" autoComplete="off">
           <div className="space-y-1">
             <label className="text-slate-700 font-medium block">
               Username
@@ -64,9 +64,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="washeng"
+                placeholder="Masukkan username"
+                autoComplete="off"
                 className="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition"
                 required
+                autoFocus
               />
             </div>
           </div>
@@ -81,10 +83,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Masukkan password"
+                autoComplete="new-password"
                 className="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition"
                 required
-                autoFocus
               />
             </div>
           </div>
