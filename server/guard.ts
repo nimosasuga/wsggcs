@@ -68,3 +68,34 @@ export function analyzeSqlSafety(sql: string): QuerySafetyCheck {
     dangerLevel: 'SAFE',
   };
 }
+
+/**
+ * Validasi scope isolasi database:
+ * Hanya mengizinkan database milik Washeng dan memblokir database lain.
+ */
+export function isDatabaseAllowed(dbName?: string): boolean {
+  if (!dbName) return false;
+  const lower = dbName.trim().toLowerCase();
+
+  // Database sistem MySQL selalu diblokir dari scope studio
+  const systemDbs = ['information_schema', 'performance_schema', 'mysql', 'sys'];
+  if (systemDbs.includes(lower)) return false;
+
+  // Jika terdapat konfigurasi whitelist eksplisit di .env
+  const allowedEnv = process.env.ALLOWED_DATABASES;
+  if (allowedEnv && allowedEnv.trim()) {
+    const patterns = allowedEnv.split(',').map(s => s.trim().toLowerCase());
+    return patterns.some(pattern => {
+      if (pattern.endsWith('*')) {
+        return lower.startsWith(pattern.slice(0, -1));
+      }
+      return lower === pattern;
+    });
+  }
+
+  // Kebijakan Baku Ekosistem Washeng:
+  // Hanya izinkan database utama (u495297697_appsheet) atau database dengan awalan washeng_ / u495297697_
+  const primaryDb = (process.env.DB_DATABASE || 'u495297697_appsheet').toLowerCase();
+  return lower === primaryDb || lower.startsWith('washeng_') || lower.startsWith('u495297697_');
+}
+

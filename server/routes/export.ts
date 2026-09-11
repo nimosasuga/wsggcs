@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { getPool } from '../db.js';
+import { isDatabaseAllowed } from '../guard.js';
 import { RowDataPacket } from 'mysql2';
 
 function formatIsoValue(val: any): string {
@@ -32,6 +33,11 @@ export async function exportRoutes(fastify: FastifyInstance) {
     const format = req.query.format || 'csv';
     const limit = Math.min(Number(req.query.limit) || 50000, 100000);
     const dbName = req.query.database || process.env.DB_DATABASE || 'u495297697_appsheet';
+
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
+
     // Delimiter: Default to Indonesian CSV standard (semicolon ';'), can be set to comma ','
     const delimiter = req.query.delimiter === ',' ? ',' : ';';
 
@@ -92,6 +98,11 @@ export async function exportRoutes(fastify: FastifyInstance) {
   // Export Entire Database or Selected Tables (Full SQL Dump or JSON - phpMyAdmin Style)
   fastify.get('/api/export-database', async (req: FastifyRequest<{ Querystring: { database?: string; format?: 'sql' | 'json'; tables?: string; includeStructure?: string; includeData?: string } }>, reply: FastifyReply) => {
     const dbName = req.query.database || process.env.DB_DATABASE || 'u495297697_appsheet';
+
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
+
     const format = req.query.format || 'sql';
     const includeStructure = req.query.includeStructure !== 'false';
     const includeData = req.query.includeData !== 'false';

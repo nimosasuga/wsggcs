@@ -1,17 +1,18 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { getPool } from '../db.js';
 import { extractUser } from '../auth.js';
+import { isDatabaseAllowed } from '../guard.js';
 import { RowDataPacket } from 'mysql2';
 
 export async function schemaRoutes(fastify: FastifyInstance) {
-  // 1. Get all databases
+  // 1. Get all databases (Filtered to Washeng scope only)
   fastify.get('/api/databases', async (_req: FastifyRequest, reply: FastifyReply) => {
     try {
       const pool = getPool();
       const [rows] = await pool.query<RowDataPacket[]>('SHOW DATABASES');
       const databases = rows
         .map((r: any) => r.Database)
-        .filter((db: string) => !['information_schema', 'performance_schema', 'mysql', 'sys'].includes(db));
+        .filter((db: string) => isDatabaseAllowed(db));
       return reply.send({ ok: true, databases });
     } catch (err: any) {
       return reply.status(500).send({ ok: false, error: err.message });
@@ -86,6 +87,9 @@ export async function schemaRoutes(fastify: FastifyInstance) {
   fastify.get('/api/tables', async (req: FastifyRequest<{ Querystring: { database?: string } }>, reply: FastifyReply) => {
     try {
       const dbName = req.query.database || process.env.DB_DATABASE || 'u495297697_appsheet';
+      if (!isDatabaseAllowed(dbName)) {
+        return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+      }
       const pool = getPool(dbName);
 
       let tables: any[] = [];
@@ -149,6 +153,9 @@ export async function schemaRoutes(fastify: FastifyInstance) {
     try {
       const { table } = req.params;
       const dbName = req.query.database || process.env.DB_DATABASE || 'u495297697_appsheet';
+      if (!isDatabaseAllowed(dbName)) {
+        return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+      }
       const pool = getPool(dbName);
 
       // Fetch column details

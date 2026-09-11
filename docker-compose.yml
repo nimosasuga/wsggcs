@@ -20,11 +20,17 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
-          cpus: '0.5'
+          memory: 384M
+          cpus: '0.75'
     networks:
       - washeng
+      - proxy
 
 networks:
   washeng:
+    name: washeng-app_washeng
     external: true
+  proxy:
+    name: proxy
+    external: true
+

@@ -1,21 +1,30 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { getPool } from '../db.js';
-import { analyzeSqlSafety } from '../guard.js';
+import { analyzeSqlSafety, isDatabaseAllowed } from '../guard.js';
 
 interface QueryBody {
   sql: string;
   confirmed?: boolean;
   limit?: number;
   offset?: number;
+  database?: string;
 }
 
 export async function queryRoutes(fastify: FastifyInstance) {
   // Execute SQL statement
   fastify.post('/api/query', async (req: FastifyRequest<{ Body: QueryBody }>, reply: FastifyReply) => {
-    const { sql, confirmed } = req.body;
+    const { sql, confirmed, database } = req.body;
 
     if (!sql || !sql.trim()) {
       return reply.status(400).send({ ok: false, error: 'SQL query tidak boleh kosong.' });
+    }
+
+    const targetDb = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(targetDb)) {
+      return reply.status(403).send({
+        ok: false,
+        error: `Akses ditolak: Database "${targetDb}" di luar jangkauan ekosistem Washeng.`,
+      });
     }
 
     // Safety guard check
@@ -29,7 +38,7 @@ export async function queryRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const pool = getPool();
+    const pool = getPool(targetDb);
     const startTime = process.hrtime.bigint();
 
     try {

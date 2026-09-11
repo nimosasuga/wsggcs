@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { getPool } from '../db.js';
+import { isDatabaseAllowed } from '../guard.js';
 
 interface ImportPayload {
   table: string;
@@ -101,6 +102,10 @@ export async function importRoutes(fastify: FastifyInstance) {
     const { columns, rows, mode = 'INSERT', database } = req.body || {};
     const dbName = database || req.query?.database || process.env.DB_DATABASE || 'u495297697_appsheet';
 
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
+
     if (!columns || columns.length === 0 || !rows || rows.length === 0) {
       return reply.status(400).send({ ok: false, error: 'Data baris atau kolom kosong.' });
     }
@@ -154,6 +159,10 @@ export async function importRoutes(fastify: FastifyInstance) {
   fastify.post('/api/import-sql', async (req: FastifyRequest<{ Body: { sql: string; database?: string } }>, reply: FastifyReply) => {
     const { sql, database } = req.body || {};
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
 
     if (!sql || !sql.trim()) {
       return reply.status(400).send({ ok: false, error: 'Konten atau file SQL kosong.' });

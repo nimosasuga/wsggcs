@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { getPool } from '../db.js';
+import { isDatabaseAllowed } from '../guard.js';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 interface RowPayload {
@@ -36,6 +37,9 @@ export async function crudRoutes(fastify: FastifyInstance) {
     }
 
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
     const pool = getPool(dbName);
 
     try {
@@ -52,12 +56,12 @@ export async function crudRoutes(fastify: FastifyInstance) {
 
       return reply.send({
         ok: true,
-        message: 'Baris data berhasil ditambahkan.',
+        message: 'Baris data baru berhasil ditambahkan.',
         insertId: res.insertId,
         affectedRows: res.affectedRows,
       });
     } catch (err: any) {
-      return reply.status(400).send({ ok: false, error: err.message || 'Gagal menambahkan baris.' });
+      return reply.status(400).send({ ok: false, error: err.message || 'Gagal menambahkan baris data.' });
     }
   });
 
@@ -67,13 +71,16 @@ export async function crudRoutes(fastify: FastifyInstance) {
     const { database, data, primaryKey } = req.body || {};
 
     if (!data || Object.keys(data).length === 0) {
-      return reply.status(400).send({ ok: false, error: 'Data perubahan kosong.' });
+      return reply.status(400).send({ ok: false, error: 'Data baris tidak boleh kosong.' });
     }
     if (!primaryKey || Object.keys(primaryKey).length === 0) {
-      return reply.status(400).send({ ok: false, error: 'Primary key wajib disertakan untuk update.' });
+      return reply.status(400).send({ ok: false, error: 'Primary key diperlukan untuk memperbarui baris.' });
     }
 
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
     const pool = getPool(dbName);
 
     try {
@@ -113,6 +120,9 @@ export async function crudRoutes(fastify: FastifyInstance) {
     }
 
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
     const pool = getPool(dbName);
 
     try {
@@ -143,6 +153,9 @@ export async function crudRoutes(fastify: FastifyInstance) {
     }
 
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
     const pool = getPool(dbName);
     const conn = await pool.getConnection();
 
@@ -183,6 +196,9 @@ export async function crudRoutes(fastify: FastifyInstance) {
     }
 
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
     const pool = getPool(dbName);
 
     try {
@@ -241,6 +257,9 @@ export async function crudRoutes(fastify: FastifyInstance) {
     }
 
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
     const pool = getPool(dbName);
 
     try {
@@ -261,6 +280,9 @@ export async function crudRoutes(fastify: FastifyInstance) {
     }
 
     const dbName = database || process.env.DB_DATABASE || 'u495297697_appsheet';
+    if (!isDatabaseAllowed(dbName)) {
+      return reply.status(403).send({ ok: false, error: `Akses ditolak: Database "${dbName}" di luar jangkauan ekosistem Washeng.` });
+    }
     const pool = getPool(dbName);
 
     try {
