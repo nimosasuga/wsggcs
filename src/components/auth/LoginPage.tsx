@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Lock, User, LogIn, AlertCircle, RefreshCw, Server } from 'lucide-react';
 import { api } from '../../services/api';
 import { AuthUser } from '../../types/database';
-import { BrandLogo } from '../common/BrandLogo';
 
 interface LoginPageProps {
   onLoginSuccess: (user: AuthUser) => void;
@@ -36,12 +35,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="min-h-screen w-screen flex items-center justify-center bg-slate-100/80 px-4 select-none font-sans">
       <div className="max-w-sm w-full bg-white border border-slate-200 rounded-xl shadow-md p-6 sm:p-7 space-y-5">
-        {/* Brand Header */}
-        <div className="flex flex-col items-center text-center space-y-2 pb-1 border-b border-slate-100">
-          <BrandLogo size="lg" showSubtitle={false} className="justify-center mb-1" />
-          <p className="text-xs text-slate-500 font-sans">
-            Masuk untuk mengelola database MySQL
-          </p>
+        {/* Brand Header with Corporate Logo */}
+        <div className="flex flex-col items-center text-center space-y-3 pb-2 border-b border-slate-100">
+          <div className="w-full flex items-center justify-center py-2 px-3 rounded-xl bg-slate-50/70 border border-slate-100">
+            <img
+              src="/img/logo-login.jpg"
+              alt="Bintara Teknologi Nusa"
+              className="h-13 sm:h-15 w-auto max-w-full object-contain mix-blend-multiply"
+            />
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center justify-center gap-1.5">
+              <span className="font-bold text-slate-800 text-sm tracking-tight">Washeng DB Studio</span>
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                MySQL
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-sans">
+              Grand Control Management & Database Ops
+            </p>
+          </div>
         </div>
 
         {/* Error Notification */}
